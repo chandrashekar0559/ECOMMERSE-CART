@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.6/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
+        <script type="text/javascript">
+            var addproduct = angular.module('addproduct', []);
+
+            var addProductController = function ($scope , $http) {
+                var model = this;
+                model.addproduct = function () {
+                    var productName = $scope.productName;
+                    var productName = productName.trim();
+                    var categore = $scope.categore.trim();
+                    var fileName = $('input[type=url]').val();
+                    var price = $scope.price;
+                    var details = $scope.details;
+                    var rating = $scope.rating;
+                    var availability = $("input[name=availability]:checked").val();
+                    console.log("productName--" + productName + "--categore--" + categore + "--fileName--" + fileName + "=-price--" + price + "--details--" + details + "--rating--" + rating + "--availability--" + availability);
+                    if (productName == 'undefined' || categore == 'undefined' || fileName.length < "1"
+                            || price == "undefined" || details == 'undefined' || rating == 'undefined' || availability == 'undefined') {
+                        alert("Please Re-check Your details and all fields are Mandatery!!!");
+                    } else {
+                        var productDetails = {
+                            productName: productName,
+                            categore: categore,
+                            fileName: fileName ,
+                            price :price,
+                            details :details,
+                            rating:rating ,
+                            availability:availability
+                        };
+                        model.resPD = $http.post('/addproduct', productDetails);
+                        console.log(productDetails)
+                        model.resPD.success(function (data, status, headers, config) {
+                            alert("success");
+                            document.location.href = '/productViewUpdate'
+                        });
+                        model.resPD.error(function (data, status, headers, config) {
+                            alert("Some thing went wrong Please try after SomeTime!.");
+                        });
+                    }
+                };
+            };
+
+            addproduct.controller("adproductcon", ["$scope","$http", addProductController]);
+        </script>
+        <style type="text/css">
+            body {
+                position: relative; 
+            }
+            .padding-left20{padding-left: 20px;}
+            .padding-left50{padding-left: 50px;}
+            .padding-left100{padding-left: 100px;}
+            .margin-left25{margin-left: 25%;}
+            .padding-top20{padding-top: 20px;}
+            .padding-left80{padding-left: 80px}
+            footer a{color:#f5f5f5;}
+            .footer{background: #343a40 !important; padding: 30px;}
+        </style> 
+
+    </head>
+    <body data-spy="scroll" data-target=".navbar" data-offset="50"  >
+        <div ng-app="addproduct" ng-controller="adproductcon as adprdctctl" ng-clock>
+            <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">  
+                <ul class="navbar-nav">
+                    <li class="nav-item padding-left20">
+                        <a class="nav-link btn btn btn-outline-warning" href="/">HOME</a>
+                    </li>
+                    <li class="nav-item padding-left20" >
+                        <a class="nav-link btn btn btn-outline-success" href="/admin">Add Product</a>
+                    </li>
+                    <li class="nav-item padding-left20"> 
+                            <a class="nav-link btn btn btn-outline-info" href="/productViewUpdate">View & Update & Remove Products</a>
+                    </li>
+                    <li class="nav-item padding-left20" ><a class="nav-link btn btn-outline-danger"  href="/logout">LOGOUT</a></li>
+
+                </ul>
+            </nav>
+            <div id="createSection" class="container-fluid bg-light" style="padding-top:100px;padding-bottom:100px;">
+                <h1 class="text-center">Add Product Details !!!</h1>
+                <p class="text-center">For Adding the products - You suppose to fill all below fields.</p>
+                <div class="text-center">
+                    <form  method="post" id="addProduct" name="addProduct">
+                        <select id="categore" class="form-control" required ng-model="categore" >
+                            <option>Mobiles</option>
+                            <option>Electronics</option>
+                            <option>Furniture</option>
+                            <option>Clothes</option>
+                            <option>Others</option>
+                        </select> <br/><br/>
+
+                        <input class="form-control" type="url" id="fileName" name="fileName" placeholder="Give Image URL here"  required ng-model="fileName" />   <br/><br/>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <td>Name:</td>
+                                    <td> <input class="form-control" type="text" placeholder="Give Product Name" name="productName" min="4" max="12" minlength="4" maxlength="12" id="productName" ng-model="productName" required /> </td>
+                                </tr>
+                                <tr>
+                                    <td>Price:</td>
+                                    <td><input class="form-control" type="number" placeholder="Give product price" name="price" minlength="10" min="10" id="price" required ng-model="price" /> </td>
+                                </tr>
+                                <tr>
+                                    <td>Details:</td>
+                                    <td><textarea class="form-control" rows="5" id="details" required ng-model="details"></textarea> </td>
+                                </tr>
+                                <tr>
+                                    <td>Rating:</td>
+                                    <td><input type="tel" name="rating" min="1" max="5" minlength="1" maxlength="5" required ng-model="rating" /> </td>
+                                </tr>
+                                <tr>
+                                    <td>Availability:</td>
+                                    <td> <label class="radio-inline form-control"><input type="radio" id="availability" value="YES" name="availability">YES</label>
+                                        <label class="radio-inline form-control"><input type="radio" id="availability" value="NO" name="availability">NO</label> </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="submit" class="btn btn-success"  ng-click="adprdctctl.addproduct($event);">Add Product</button>    
+                    </form>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+            <div id="editSection" class="container-fluid bg-light" style="padding-top:100px;padding-bottom:100px;display: none;">
+                <p class="text-center">Hello admin please give question and options then select one answer Flag<p>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+        <footer class="text-center footer">
+            <p><a href='mailto:chandrashekar.mungi@gmail.com'>Chandrashekar.mungi@gmail.com</a></p>
+        </footer>
+    </body>
+</html>
