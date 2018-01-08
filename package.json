@@ -5,6 +5,7 @@
     "bcrypt-nodejs": "latest",
     "connect-flash": "~0.1.1",
     "consolidate": "^0.15.0",
+    "cookie-parser": "^1.4.3",
     "ejs": "~0.8.5",
     "express": "~3.4.4",
     "express-session": "^1.15.6",

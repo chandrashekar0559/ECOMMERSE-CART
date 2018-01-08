@@ -4,6 +4,7 @@ var bcrypt = require('bcrypt-nodejs');
 var session = require('express-session'); // module for maintaining the sessions
 // load up the user model
 var User = require('../app/models/user');
+var AdminUser = require('../app/models/adminuser');
 
 module.exports = function (passport) {
     // passport session setup ==================================================
@@ -145,4 +146,130 @@ module.exports = function (passport) {
                 });
 
             }));
+            
+  // =========================================================================
+  // ADMIN LOCAL LOGIN =============================================================
+  // =========================================================================
+    passport.use('local-adminlogin', new LocalStrategy({
+        // by default, local strategy uses username and password, we will override with email
+        usernameField: 'email',
+        passwordField: 'password',
+        passReqToCallback: true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
+    },
+            function (req, email, password, done) {
+                // asynchronous
+                process.nextTick(function () {
+                    AdminUser.findOne({'local.email': email}, function (err, user) {
+                        // if there are any errors, return the error
+                        if (err)
+                            return done(err);
+                        // if no user is found, return the message
+                        if (!user)
+                            return done(null, false, req.flash('loginMessage', 'No user found.'));
+
+                        if (!user.validPassword(password))
+                            return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
+
+                        // all is well, return user
+                        else
+                            return done(null, user);
+                    });
+                });
+
+            }));
+    // =========================================================================
+    //ADMIN LOCAL FORGOTPASSWORD UPDATE =============================================================
+    // =========================================================================
+    passport.use('local-adminforgotpassword', new LocalStrategy({
+        // by default, local strategy uses username and password, we will override with email
+        usernameField: 'email',
+        passwordField: 'password',
+        passReqToCallback: true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
+    },
+            function (req, email, password, done) {
+
+                // asynchronous
+                process.nextTick(function () {
+
+                    AdminUser.findOne({'local.email': email}, function (err, user) {
+                        // if there are any errors, return the error
+                        if (err)
+                            return done(err);
+                        console.log("err" + err)
+                        // if no user is found, return the message
+                        if (!user)
+                            return done(null, false, req.flash('forgotMessage', 'No user found.'));
+                        if (email == 'admin@gmail.com') {
+                            return done(null, false, req.flash('forgotMessage', 'You Can not edit this password'));
+                        }
+                        // all is well, return user
+                        else
+                            user.local.password = user.generateHash(password);
+                        user.save(function (err) {
+                            if (err)
+                                throw err;
+                            return done(null, user);
+                        });
+                    });
+                });
+
+            }));
+
+    // =========================================================================
+    // LOCAL SIGNUP ============================================================
+    passport.use('local-adminsignup', new LocalStrategy({
+        // by default, local strategy uses username and password, we will override with email
+        usernameField: 'email',
+        passwordField: 'password',
+        passReqToCallback: true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
+    },
+            function (req, email, password, done) {
+
+                // asynchronous
+                process.nextTick(function () {
+
+                    //  Whether we're signing up or connecting an account, we'll need
+                    //  to know if the email address is in use.
+                    AdminUser.findOne({'local.email': email}, function (err, existingUser) {
+
+                        // if there are any errors, return the error
+                        if (err)
+                            return done(err);
+
+                        // check to see if there's already a user with that email
+                        if (existingUser)
+                            return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+
+                        //  If we're logged in, we're connecting a new local account.
+                        if (req.user) {
+                            var user = req.user;
+                            user.local.email = email;
+                            user.local.password = user.generateHash(password);
+                            user.save(function (err) {
+                                if (err)
+                                    throw err;
+                                return done(null, user);
+                            });
+                        }
+                        //  We're not logged in, so we're creating a brand new user.
+                        else {
+                            // create the user
+                            var newUser = new AdminUser();
+
+                            newUser.local.email = email;
+                            newUser.local.password = newUser.generateHash(password);
+
+                            newUser.save(function (err) {
+                                if (err)
+                                    throw err;
+
+                                return done(null, newUser);
+                            });
+                        }
+
+                    });
+                });
+
+            }));
+            
 };

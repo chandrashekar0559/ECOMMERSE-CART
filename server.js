@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var passport = require('passport');
 var flash = require('connect-flash');
 var session = require('express-session'); // module for maintaining the sessions
+var cookieParser = require('cookie-parser');
 var configDB = require('./config/database.js');
 var engines = require('consolidate');
 
@@ -21,7 +22,7 @@ app.configure(function () {
     app.use(express.bodyParser()); // get information from html forms
 
     app.set('view engine', 'ejs'); // set up ejs for templating
-    
+
     // required for passport
     app.use(session({
         name: 'CART',
@@ -40,6 +41,19 @@ app.configure(function () {
     app.use(flash()); // use connect-flash for flash messages stored in session
 
 });
+
+//session
+
+
+app.use(require('cookie-parser')())
+app.use(require('express-session')({secret: ' cart app', resave: true, httpOnly: true,
+    proxy: true,
+    saveUnintialized: true,
+    cookie: {secure: false}
+}))
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // routes ======================================================================
 require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport

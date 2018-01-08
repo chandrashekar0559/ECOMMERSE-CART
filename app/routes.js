@@ -46,12 +46,7 @@ module.exports = function (app, passport) {
         if (!currentUser) {
             res.render('login.ejs', {message: req.flash('loginMessage')});
         } else {
-            if (req.user.local.email == 'admin@gmail.com') {
-                res.redirect('/admin');
-            } else {
-                res.redirect('/');
-            }
-
+            res.redirect('/');
         }
 
     });
@@ -59,7 +54,7 @@ module.exports = function (app, passport) {
     var User = require('../app/models/user');
 // process the login form
     app.post('/login', passport.authenticate('local-login', {
-        successRedirect: '/dashboard', // redirect to the secure profile section
+        successRedirect: '/', // redirect to the secure profile section
         failureRedirect: '/login', // redirect back to the signup page if there is an error
         failureFlash: true // allow flash messages
     }));
@@ -99,21 +94,64 @@ module.exports = function (app, passport) {
         failureFlash: true // allow flash messages
     }));
 // ADMIN =================================
-// show the Admin Page
-    app.get('/admin', isLoggedIn, function (req, res) {
-        if (req.user.local.email == 'admin@gmail.com') {
-            res.render('addproduct.ejs', {message: req.flash('adminMessage')});
+// 
+// 
+// 
+    mongoose = require('mongoose');
+    var AdminUser = require('../app/models/adminuser');
+    var Useradmin = mongoose.model('Useradmin');
+    app.get('/adminlogin', function (req, res) {
+        var currentUser = req.user;
+        if (!currentUser) {
+            res.render('adminLogin.ejs', {message: req.flash('loginMessage')});
         } else {
-            res.redirect('/profile');
+            res.redirect('/admin');
         }
+
+    });
+
+// process the login form
+    app.post('/adminlogin', passport.authenticate('local-adminlogin', {
+        successRedirect: '/admin', // redirect to the secure profile section
+        failureRedirect: '/adminlogin', // redirect back to the signup page if there is an error
+        failureFlash: true // allow flash messages
+    }));
+// LOGIN ===============================
+// show the login form
+    app.get('/adminforgotpassword', function (req, res) {
+        res.render('adminforgotpassword.ejs', {message: req.flash('forgotMessage')});
+    });
+
+// process the login form
+    app.post('/adminforgotpassword', passport.authenticate('local-adminforgotpassword', {
+        successRedirect: '/adminlogin', // redirect to the secure profile section
+        failureRedirect: '/adminforgotpassword', // redirect back to the signup page if there is an error
+        failureFlash: true // allow flash messages
+    }));
+// SIGNUP =================================
+// show the signup form
+    app.get('/adminsignup', function (req, res) {
+        res.render('adminSignup.ejs', {message: req.flash('signupMessage')});
+    });
+
+// process the signup form
+    app.post('/adminsignup', passport.authenticate('local-adminsignup', {
+        successRedirect: '/admin', // redirect to the secure profile section
+        failureRedirect: '/adminsignup', // redirect back to the signup page if there is an error
+        failureFlash: true // allow flash messages
+    }));
+// show the Admin Page
+    app.get('/admin', function (req, res) {
+        var user = req.session.user;
+        console.log(user);
+        res.render('addproduct.ejs', {message: req.flash('adminMessage')});
     });
 
     mongoose = require('mongoose');
 
     var prdctModel = require('../app/models/productModel');
-    var adminUserModel = require('../app/models/adminuser');
     var productModel = mongoose.model('productModel');
-    var Useradmin = mongoose.model('Useradmin');
+
 // process the Admin ============================================================================ 
     app.post('/addproduct', function (req, res) {
         var newProduct = new productModel({
@@ -139,40 +177,36 @@ module.exports = function (app, passport) {
         });
 
     });
-    app.get('/productViewUpdate', isLoggedIn, function (req, res) {
-        if (req.user.local.email == 'admin@gmail.com') {
-            res.render('productViewUpdate.ejs');
-        } else {
-            res.redirect('/profile');
-        }
+    app.get('/productViewUpdate', function (req, res) {
+        res.render('productViewUpdate.ejs');
     });
 
     app.get('/listOfProducts', function (req, res) {
         productModel.find(function (err, result) {
             if (err) {
-                res.send(err)
+                res.send(err);
             } else {
                 res.send(result);
             }
-        })
+        });
     });
     app.get('/listOfProducts/:categore', function (req, res) {
         productModel.find({'categore': req.params.categore}, function (err, result) {
             if (err) {
-                res.send(err)
+                res.send(err);
             } else {
                 res.send(result);
             }
-        })
+        });
     });
     app.post('/adminDelteProduct/:id', function (req, res) {
         productModel.remove({'_id': req.params.id}, function (err, result) {
             console.log("delete-error" + req.params.id);
             if (err) {
-                res.send(err)
+                res.send(err);
             } else {
-                console.log(result)
-                res.send("Delted!!" + result)
+                console.log(result);
+                res.send("Delted!!" + result);
             }
 
         });
@@ -182,10 +216,10 @@ module.exports = function (app, passport) {
     app.get('/productUpdate/:id', function (req, res) {
         productModel.findOne({'_id': req.params.id}, function (err, result) {
             if (err) {
-                console.log("error-" + req.params.id)
+                console.log("error-" + req.params.id);
 // res.send(err)
             } else {
-                console.log(result)
+                console.log(result);
 // res.send(result)
                 res.render('productUpdate.ejs', {result: result});
             }
@@ -198,14 +232,13 @@ module.exports = function (app, passport) {
         var update = req.body;
         productModel.findByIdAndUpdate({'_id': req.params.id}, update, function (err, result) {
             if (err) {
-                console.log("error-" + req.params.id)
-                res.send(err)
+                console.log("error-" + req.params.id);
+                res.send(err);
             } else {
-                console.log(result)
-                res.send(result)
+                console.log(result);
+                res.send(result);
             }
-
-        })
+        });
     });
 };
 // route middleware to ensure user is logged in
@@ -213,19 +246,13 @@ function isLoggedIn(req, res, next) {
     if (req.isAuthenticated())
         return next();
     res.redirect('/');
-}
-;
+};
+// route middleware to ensure user is logged in
+function isadminLoggedIn(req, res, next) {
+    if (req.isAuthenticated())
+        return next();
+    res.redirect('/adminlogin');
+};
 
-function isAdminLoggedIn(req, res, next) {
-    Useradmin.findOne({'local.email': email}, function (err, result) {
-        if (err) {
-            console.log("error-" + req.params.id)
-            res.send(err)
-        } else {
-            console.log(result)
-            res.send(result)
-        }
-    })
-}
-;
+
 

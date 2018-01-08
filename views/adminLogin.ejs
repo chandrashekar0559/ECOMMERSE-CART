@@ -33,8 +33,9 @@
                 </div>
                 <div class="collapse navbar-collapse" id="myNavbar">
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="/signup">SIGN UP</a></li>
-                        <li><a href="/profile">PROFILE</a></li>
+                       <li><a href="/">HOME</a></li>
+                        <li><a href="/adminlogin">LOGIN</a></li>
+                        <li><a href="/adminsignup">SIGN UP</a></li>
                         <li><a href="/contact">CONTACT</a></li>
                     </ul>
                 </div>
@@ -42,7 +43,7 @@
         </nav>
         <div class="container">
             <div class="col-sm-6 col-sm-offset-3 jumbotron">
-                <h1 class="text-center"><span class="fa fa-sign-in"></span> Login</h1>
+                <h1 class="text-center"><span class="fa fa-sign-in"></span>Admin Login</h1>
 
                 <% if (message.length > 0) { %>
                 <div class="alert alert-danger"><%= message %></div>
@@ -58,12 +59,12 @@
                         <label>Password</label>
                         <input type="password" class="form-control" name="password" min="4" required>
                     </div>
-                    <p class="text-right"><a href="/forgotpassword">Forgot Password ?</a></p>
+                    <p class="text-right"><a href="/adminforgotpassword">Forgot Password ?</a></p>
                     <div class="text-center"><button type="submit" class="btn btn-warning btn-lg">Login</button></div>
                 </form>
                 <hr>
                 <div class="text-center">
-                    <p>Need an account? <a href="/signup">Sign Up</a></p>
+                    <p>Need an account? <a href="/adminsignup">Sign Up</a></p>
                 </div>
 
             </div>
